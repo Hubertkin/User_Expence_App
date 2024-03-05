@@ -1,15 +1,18 @@
+// Importing necessary libraries
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+// Importing custom widgets and models
 import './widgets/new_transactions.dart';
 import 'models/transaction.dart';
 import 'widgets/transaction_list.dart';
 import 'widgets/chart.dart';
 
+// Main entry point for the application
 void main() => runApp(const MyApp());
 
+// Root of the application
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
@@ -17,6 +20,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       home: const MyHomePage(),
+
+      // App theme configuration
       theme: ThemeData(
         primarySwatch: Colors.purple,
         hintColor: Colors.amber,
@@ -27,7 +32,6 @@ class MyApp extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
-              // button:  const TextStyle(color: Colors.white),
             ),
         appBarTheme: const AppBarTheme(
           titleTextStyle: TextStyle(
@@ -41,6 +45,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Main content of the application
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -49,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  // List to store user transactions
   final List<Transaction> _userTransactions = [
     // Transaction(
     //   id: 't1',
@@ -63,25 +69,30 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     //   date: DateTime.now(),
     // ),
   ];
+
+  // Variable to track whether to show the chart or not
   bool _showChart = false;
 
+// Lifecycle method: initState
   void initSate() {
-     super.initState();
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
-   
   }
 
+// Lifecycle method: didChangeAppLifecycleState
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint(state.toString());
   }
 
+// Lifecycle method: dispose
   @override
   void dispose() {
-    WidgetsBinding.instance. removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+// Getter for recent transactions within the last 7 days
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
       return tx.date.isAfter(DateTime.now().subtract(
@@ -90,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }).toList();
   }
 
+ // Method to add a new transaction
   void _addNewTransaction(
       String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Transaction(
@@ -103,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
   }
 
+// Method to open the modal bottom sheet for adding new transactions
   void _startAddNewTransactions(BuildContext ctx) {
     showModalBottomSheet(
         context: ctx,
@@ -115,12 +128,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         });
   }
 
+  // Function to delete a transaction
   void _deleteTransaction(String id) {
     setState(() {
       _userTransactions.removeWhere((tx) => tx.id == id);
     });
   }
 
+  // Method to build content for landscape orientation
   List<Widget> _buildLandscapeContent(MediaQueryData mediaQuery,
       PreferredSizeWidget appBar, Widget txListWidget) {
     return [
@@ -133,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           ),
           Switch.adaptive(
               activeColor: Theme.of(context).hintColor,
-              value: _showChart,
+              value: _showChart, // Variable to hold the state of the switch
               onChanged: (val) {
                 setState(() {
                   _showChart = val;
@@ -147,11 +162,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       appBar.preferredSize.height -
                       mediaQuery.padding.top) *
                   0.7,
-              child: Chart(_recentTransactions))
+              child: Chart(
+                  _recentTransactions)) // Variable to hold recent transactions
           : txListWidget
     ];
   }
 
+  // Function to build the portrait view
   List<Widget> _buildPortraitContent(MediaQueryData mediaQuery,
       PreferredSizeWidget appBar, Widget txListWidget) {
     return [
@@ -160,16 +177,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   appBar.preferredSize.height -
                   mediaQuery.padding.top) *
               0.3,
-          child: Chart(_recentTransactions)),
+          child: Chart(
+              _recentTransactions)), // Variable to hold recent transactions
       txListWidget
     ];
   }
 
-//   late String titleInput;
+  // Widget to build the UI
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final isLanscape = mediaQuery.orientation == Orientation.landscape;
+    final mediaQuery =
+        MediaQuery.of(context); // Variable to hold media query data
+    final isLanscape = mediaQuery.orientation ==
+        Orientation.landscape; // Variable to hold the orientation state
     final PreferredSizeWidget appBar = Platform.isIOS
         ? PreferredSize(
             preferredSize: Size.fromHeight(
@@ -186,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   ],
                 )),
           )
-        : AppBar(
+        : AppBar( // Material-specific app bar
             title: const Text('Personal Expenses'),
             actions: [
               IconButton(
@@ -195,16 +215,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               ),
             ],
           );
+          // Creating the transaction list widget
     final txListWidget = SizedBox(
         height: (mediaQuery.size.height -
                 appBar.preferredSize.height -
                 mediaQuery.padding.top) *
             0.7,
-        child: TransactionList(_userTransactions, _deleteTransaction));
+        child: TransactionList(_userTransactions,
+            _deleteTransaction)); // Variable to hold the transaction list widget
+   
+    // Constructing the main body of the page
     final pageBody = SafeArea(
       child: SingleChildScrollView(
         child: Column(
-          //mainAxisAlignment: MainAxisAlignment.start,
+  
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (isLanscape)
